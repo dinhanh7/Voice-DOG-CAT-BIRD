@@ -47,19 +47,19 @@ data = data[..., np.newaxis]  # Thêm chiều cho channel (dạng ảnh)
 X_train, X_test, y_train, y_test = train_test_split(data, targets, test_size=0.2, random_state=42)
 print(f"Training data shape: {X_train.shape}, Test data shape: {X_test.shape}")
 
-# Xây dựng mô hình CNN
+# Xây dựng mô hình CNN, mô hình này xử lí dạng ảnh (128,128,1)
 def build_cnn(input_shape, num_classes):
     model = Sequential([
-        Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
-        MaxPooling2D((2, 2)),
-        Dropout(0.2),
+        Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),  #Tìm kiếm đặc trưng không gian từ dữ liệu đầu vào
+        MaxPooling2D((2, 2)), #Giảm kích thước không gian, giữ lại đặc trưng chính
+        Dropout(0.2), #Ngăn overfitting bằng cách loại bỏ ngẫu nhiên các neuron
         Conv2D(64, (3, 3), activation='relu'),
         MaxPooling2D((2, 2)),
         Dropout(0.2),
         Flatten(),
-        Dense(128, activation='relu'),
+        Dense(128, activation='relu'), #Lớp kết nối hoàn toàn để thực hiện phân loại
         Dropout(0.5),
-        Dense(num_classes, activation='softmax')
+        Dense(num_classes, activation='softmax') #softmax là hàm chuyển đầu ra cho các lớp
     ])
     model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     return model
