@@ -1,36 +1,64 @@
-import numpy as np
+import os
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
+import numpy as np
 
-file_path = '/home/mint/Documents/VS Code/dog_bird_cat/test/cat/test_cat_1b0.wav'  # Đường dẫn file âm thanh
-# Tải tệp âm thanh mẫu (thay 'dog_sample.wav' bằng tệp bạn ghi âm từ "dog")
-y, sr = librosa.load(file_path)
+# Hàm trích xuất và vẽ các Spectral Features
+def plot_spectral_features(file_path):
+    y, sr = librosa.load(file_path, sr=None)
+    
+    # Trích xuất Spectral Features
+    spectral_centroid = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
+    spectral_bandwidth = librosa.feature.spectral_bandwidth(y=y, sr=sr)[0]
+    spectral_rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)[0]
+    spectral_contrast = librosa.feature.spectral_contrast(y=y, sr=sr)
+    
+    times = librosa.times_like(spectral_centroid, sr=sr)
+    
+    # Vẽ các Spectral Features
+    plt.figure(figsize=(10, 8))
+    
+    # Spectral Centroid
+    plt.subplot(4, 1, 1)
+    plt.semilogy(times, spectral_centroid, label='Spectral Centroid', color='blue')
+    plt.ylabel("Hz")
+    plt.title("Spectral Centroid")
+    plt.legend()
+    
+    # Spectral Bandwidth
+    plt.subplot(4, 1, 2)
+    plt.semilogy(times, spectral_bandwidth, label='Spectral Bandwidth', color='orange')
+    plt.ylabel("Hz")
+    plt.title("Spectral Bandwidth")
+    plt.legend()
+    
+    # Spectral Roll-off
+    plt.subplot(4, 1, 3)
+    plt.semilogy(times, spectral_rolloff, label='Spectral Roll-off', color='green')
+    plt.ylabel("Hz")
+    plt.title("Spectral Roll-off")
+    plt.legend()
+    
+    # Spectral Contrast
+    plt.subplot(4, 1, 4)
+    for i, band in enumerate(spectral_contrast):
+        plt.plot(times, band, label=f'Band {i+1}')
+    plt.ylabel("Amplitude")
+    plt.xlabel("Time (s)")
+    plt.title("Spectral Contrast")
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
 
-# Trích xuất MFCC từ tệp âm thanh mẫu
-mfcc_sample = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+# Đường dẫn tới file .wav cần phân tích
+AUDIO_FILE = "C:\\Users\\WINDOWS\\OneDrive - Hanoi University of Science and Technology\\Documents\\0.Temp GitHub\\Voice-DOG-CAT-BIRD\\test\\dog\\test_dog_2ce7.wav"
 
-# Lưu MFCC vào file .npy
-np.save('dog_mfcc_sample.npy', mfcc_sample)
-
-print("Mẫu MFCC đã được lưu thành công.")
-
-
-# Bước 1: Đọc file âm thanh và chuyển thành phổ Mel
-
-y, sr = librosa.load(file_path)  # Đọc âm thanh
-
-# Tính phổ Mel
-mel_spectrogram = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128)  # 128 dải tần Mel
-
-# Chuyển đổi sang thang logarit (dB) để dễ phân tích hơn
-mel_spectrogram_db = librosa.power_to_db(mel_spectrogram, ref=np.max)
-
-# Bước 2: Vẽ phổ Mel sử dụng matplotlib
-plt.figure(figsize=(10, 6))
-librosa.display.specshow(mel_spectrogram_db, sr=sr, x_axis='time', y_axis='mel')
-plt.colorbar(format='%+2.0f dB')  # Thêm thanh màu cho mức dB
-plt.title('Mel Spectrogram')
-plt.xlabel('Thời gian (s)')
-plt.ylabel('Tần số Mel')
-plt.show()
+# Gọi hàm hiển thị
+if __name__ == "__main__":
+    if os.path.isfile(AUDIO_FILE):
+        print(f"Analyzing Spectral Features for file: {AUDIO_FILE}")
+        plot_spectral_features(AUDIO_FILE)
+    else:
+        print(f"File not found: {AUDIO_FILE}")
